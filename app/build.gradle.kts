@@ -167,6 +167,9 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
+            // Side-by-side with the official app. ${applicationId} in the manifest
+            // (FileProvider authority, launch action) picks this suffix up.
+            applicationIdSuffix = ".moody"
         }
         release {
             isMinifyEnabled = true

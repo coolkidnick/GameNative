@@ -783,7 +783,7 @@ public class InputControlsView extends View {
     }
 
     private boolean isRuntimeToggleVisible() {
-        return shooterModeConfig == null || shooterModeConfig.getShowRuntimeToggle();
+        return shooterModeConfig != null && shooterModeConfig.getShowRuntimeToggle();
     }
 
     private float getJoystickOpacity() {

@@ -1,5 +1,6 @@
 package app.gamenative.ui.model
 
+import app.gamenative.ui.enums.SortOption
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -51,5 +52,33 @@ class LibrarySortUtilsTest {
         )
 
         assertEquals(listOf("alpha", "Beta", "Charlie"), sorted.map { it.name })
+    }
+
+    @Test
+    fun resolveLibrarySortOption_usesRecentlyPlayedWhenNothingIsSaved() {
+        assertEquals(
+            SortOption.RECENTLY_PLAYED,
+            LibrarySortUtils.resolveLibrarySortOption(savedKey = "", legacyOrdinal = null),
+        )
+    }
+
+    @Test
+    fun resolveLibrarySortOption_keepsASavedKeyOrLegacyOrdinal() {
+        assertEquals(
+            SortOption.NAME_ASC,
+            LibrarySortUtils.resolveLibrarySortOption(savedKey = "name_asc", legacyOrdinal = null),
+        )
+        assertEquals(
+            SortOption.NAME_DESC,
+            LibrarySortUtils.resolveLibrarySortOption(savedKey = "", legacyOrdinal = SortOption.NAME_DESC.ordinal),
+        )
+    }
+
+    @Test
+    fun openingLibraryIndex_skipsAFeaturedOrSuggestedCard() {
+        val featured = listOf(true, false, false)
+        assertEquals(1, LibrarySortUtils.openingLibraryIndex(featured.size) { featured[it] })
+        assertEquals(0, LibrarySortUtils.openingLibraryIndex(3) { false })
+        assertEquals(0, LibrarySortUtils.openingLibraryIndex(0) { true })
     }
 }

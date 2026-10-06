@@ -1352,51 +1352,45 @@ fun PluviaMain(
                             )
                         }",
                     )
-                    try {
-                        // Get the container for the app
-                        val appId = feedbackState.appId
-                        Timber.d("GameFeedback: Got appId=$appId")
-
-                        // Submit feedback via worker API
-                        Timber.d("GameFeedback: Starting coroutine for submission")
-                        viewModel.viewModelScope.launch {
-                            Timber.d("GameFeedback: Inside coroutine scope")
-                            try {
-                                Timber.d("GameFeedback: Calling submitGameFeedback with rating=${feedbackState.rating}")
-                                val result = GameFeedbackUtils.submitGameFeedback(
-                                    context = context,
-                                    appId = appId,
-                                    rating = feedbackState.rating,
-                                    tags = feedbackState.selectedTags.toList(),
-                                    notes = feedbackState.feedbackText.takeIf { it.isNotBlank() },
-                                )
-
-                                Timber.d("GameFeedback: Submission returned $result")
-                                if (result) {
-                                    Timber.d("GameFeedback: Showing success snackbar")
-                                    SnackbarManager.show("Thank you for your feedback!")
-                                } else {
-                                    Timber.d("GameFeedback: Showing failure snackbar")
-                                    SnackbarManager.show("Failed to submit feedback")
-                                }
-                            } catch (e: Exception) {
-                                Timber.e(e, "GameFeedback: Error submitting game feedback")
-                                SnackbarManager.show("Error submitting feedback")
-                            }
+                    val appId = feedbackState.appId
+                    gameFeedbackState = feedbackState.copy(
+                        phase = GameFeedbackDialogState.PHASE_SUBMITTING,
+                        confirmClose = false,
+                    )
+                    viewModel.viewModelScope.launch {
+                        val succeeded = try {
+                            GameFeedbackUtils.submitGameFeedback(
+                                context = context,
+                                appId = appId,
+                                rating = feedbackState.rating,
+                                tags = feedbackState.selectedTags.toList(),
+                                notes = feedbackState.feedbackText.takeIf { it.isNotBlank() },
+                            )
+                        } catch (e: Exception) {
+                            Timber.e(e, "GameFeedback: Error submitting game feedback")
+                            false
                         }
-                    } catch (e: Exception) {
-                        Timber.e(e, "GameFeedback: Error preparing game feedback")
-                        SnackbarManager.show("Failed to submit feedback")
-                    } finally {
-                        // Close the dialog regardless of success
-                        Timber.d("GameFeedback: Closing dialog")
-                        gameFeedbackState = GameFeedbackDialogState(visible = false)
-                        viewModel.onGameFeedbackResolved(context, feedbackState.rating, feedbackState.selectedTags)
+                        Timber.d("GameFeedback: Submission returned $succeeded")
+                        gameFeedbackState = gameFeedbackState.copy(
+                            phase = if (succeeded) {
+                                GameFeedbackDialogState.PHASE_SUCCESS
+                            } else {
+                                GameFeedbackDialogState.PHASE_FAILURE
+                            },
+                            confirmClose = false,
+                        )
                     }
                 },
                 onDismiss = {
+                    val submitted = gameFeedbackState.phase == GameFeedbackDialogState.PHASE_SUCCESS
+                    val rating = gameFeedbackState.rating
+                    val tags = gameFeedbackState.selectedTags
                     gameFeedbackState = GameFeedbackDialogState(visible = false)
-                    viewModel.onGameFeedbackResolved(context, null)
+                    viewModel.onGameFeedbackResolved(
+                        context,
+                        if (submitted) rating else null,
+                        if (submitted) tags else emptySet(),
+                    )
                 },
                 onDiscordSupport = {
                     uriHandler.openUri("https://discord.gg/2hKv4VfZfE")

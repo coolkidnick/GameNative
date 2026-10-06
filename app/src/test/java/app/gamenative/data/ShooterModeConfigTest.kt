@@ -13,6 +13,16 @@ class ShooterModeConfigTest {
     }
 
     @Test
+    fun `mouse mode banner stays off unless the setting is saved on`() {
+        assertFalse(ShooterModeConfig().showRuntimeToggle)
+        assertFalse(ShooterModeConfig.fromJson("").showRuntimeToggle)
+        assertFalse(ShooterModeConfig.fromJson("{}").showRuntimeToggle)
+
+        val savedOn = ShooterModeConfig(showRuntimeToggle = true).toJson()
+        assertTrue(ShooterModeConfig.fromJson(savedOn).showRuntimeToggle)
+    }
+
+    @Test
     fun `Win32 relative mouse input is opt in and survives serialization`() {
         assertFalse(ShooterModeConfig.fromJson("").win32RelativeMouseInput)
 

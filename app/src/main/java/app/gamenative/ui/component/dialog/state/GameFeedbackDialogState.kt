@@ -10,8 +10,18 @@ data class GameFeedbackDialogState(
     val feedbackText: String = "",
     val confirmBtnText: String = "Submit",
     val dismissBtnText: String = "Close",
+    val phase: String = PHASE_FORM,
+    val confirmClose: Boolean = false,
 ) {
+    val isResult: Boolean
+        get() = phase == PHASE_SUCCESS || phase == PHASE_FAILURE
+
     companion object {
+        const val PHASE_FORM = "form"
+        const val PHASE_SUBMITTING = "submitting"
+        const val PHASE_SUCCESS = "success"
+        const val PHASE_FAILURE = "failure"
+
         // Available tags for game issues
         val AVAILABLE_TAGS = listOf(
             "controller_issues",
@@ -33,6 +43,8 @@ data class GameFeedbackDialogState(
                     "feedbackText" to state.feedbackText,
                     "confirmBtnText" to state.confirmBtnText,
                     "dismissBtnText" to state.dismissBtnText,
+                    "phase" to state.phase,
+                    "confirmClose" to state.confirmClose,
                 )
             },
             restore = { savedMap ->
@@ -44,6 +56,8 @@ data class GameFeedbackDialogState(
                     feedbackText = savedMap["feedbackText"] as String,
                     confirmBtnText = savedMap["confirmBtnText"] as String,
                     dismissBtnText = savedMap["dismissBtnText"] as String,
+                    phase = savedMap["phase"] as? String ?: PHASE_FORM,
+                    confirmClose = savedMap["confirmClose"] as? Boolean ?: false,
                 )
             },
         )

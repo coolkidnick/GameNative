@@ -1239,8 +1239,10 @@ class LibraryViewModel @Inject constructor(
             val endIndex = min((clampedPage + 1) * pageSize, totalFound)
             var pagedList = combined.take(endIndex)
 
-            // Prepend the hero (featured > recommendation) as first item on ALL tab when
-            // enabled and not searching.
+            // The All tab still offers the hero (featured, otherwise a suggestion), but it
+            // must not be the opening card. The carousel centres the first item, which is
+            // the top of the current sort — installed games by last played, unless a saved
+            // sort says otherwise.
             val featured = cachedFeatured
             val rec = cachedRecommendation
             if (PrefManager.showRecommendations
@@ -1279,7 +1281,7 @@ class LibraryViewModel @Inject constructor(
                     else -> null
                 }
                 if (heroItem != null) {
-                    pagedList = listOf(heroItem) + pagedList.map { it.copy(index = it.index + 1) }
+                    pagedList = (pagedList + heroItem).mapIndexed { index, item -> item.copy(index = index) }
                 }
             }
 

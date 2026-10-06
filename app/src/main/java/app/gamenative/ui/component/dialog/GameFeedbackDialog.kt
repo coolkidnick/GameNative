@@ -1,5 +1,6 @@
 package app.gamenative.ui.component.dialog
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -35,9 +36,24 @@ fun GameFeedbackDialog(
     onDiscordSupport: () -> Unit,
 ) {
     if (state.visible) {
+        BackHandler {
+            when {
+                state.phase == GameFeedbackDialogState.PHASE_SUBMITTING -> Unit
+                state.isResult -> onDismiss()
+                state.confirmClose -> onStateChange(state.copy(confirmClose = false))
+                else -> onStateChange(state.copy(confirmClose = true))
+            }
+        }
         Dialog(
-            onDismissRequest = onDismiss,
-            properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+            onDismissRequest = {
+                if (state.phase != GameFeedbackDialogState.PHASE_SUBMITTING && !state.isResult) {
+                    onStateChange(state.copy(confirmClose = true))
+                }
+            },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            ),
         ) {
             Surface(
                 modifier = Modifier
@@ -52,6 +68,13 @@ fun GameFeedbackDialog(
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    if (state.phase != GameFeedbackDialogState.PHASE_FORM) {
+                        FeedbackResult(
+                            phase = state.phase,
+                            onDismiss = onDismiss,
+                        )
+                        return@Column
+                    }
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -170,6 +193,48 @@ fun GameFeedbackDialog(
                 }
             }
         }
+        if (state.confirmClose) {
+            AlertDialog(
+                onDismissRequest = { onStateChange(state.copy(confirmClose = false)) },
+                title = { Text(stringResource(R.string.game_feedback_discard_title)) },
+                text = { Text(stringResource(R.string.game_feedback_discard_message)) },
+                confirmButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.close))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { onStateChange(state.copy(confirmClose = false)) }) {
+                        Text(stringResource(R.string.game_feedback_keep_editing))
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun FeedbackResult(
+    phase: String,
+    onDismiss: () -> Unit,
+) {
+    val message = when (phase) {
+        GameFeedbackDialogState.PHASE_SUCCESS -> R.string.game_feedback_report_submitted
+        GameFeedbackDialogState.PHASE_FAILURE -> R.string.game_feedback_report_failed
+        else -> R.string.game_feedback_submitting
+    }
+    Text(
+        text = stringResource(message),
+        style = MaterialTheme.typography.headlineSmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(bottom = 16.dp),
+    )
+    if (phase != GameFeedbackDialogState.PHASE_SUBMITTING) {
+        Button(onClick = onDismiss) {
+            Text(stringResource(R.string.ok))
+        }
+    } else {
+        CircularProgressIndicator()
     }
 }
 

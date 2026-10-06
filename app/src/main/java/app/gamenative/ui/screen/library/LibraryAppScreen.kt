@@ -141,9 +141,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.gamenative.NetworkMonitor
+import app.gamenative.PluviaApp
 import app.gamenative.PrefManager
 import app.gamenative.R
 import app.gamenative.data.LibraryItem
+import app.gamenative.events.AndroidEvent
 import app.gamenative.service.SteamService
 import app.gamenative.ui.component.GamepadAction
 import app.gamenative.ui.component.GamepadActionBar
@@ -955,6 +957,20 @@ internal fun AppScreenContent(
                                 icon = Icons.Default.Delete,
                                 contentDescription = if (isInstalled || hasLeftoverInstall) stringResource(R.string.uninstall) else stringResource(R.string.delete_app),
                                 onClick = onDeleteDownloadClick,
+                            )
+                        }
+                    }
+
+                    if (isInstalled) {
+                        TextButton(
+                            onClick = {
+                                PluviaApp.events.emit(AndroidEvent.ShowGameFeedback(displayInfo.appId))
+                            },
+                            modifier = Modifier.padding(top = 4.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.report_how_it_ran),
+                                color = Color.White,
                             )
                         }
                     }

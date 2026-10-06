@@ -29,7 +29,7 @@ data class ShooterModeConfig(
     val movementJoystickBehavior: String = JOYSTICK_ANCHORED,
     val lookJoystickBehavior: String = JOYSTICK_ANCHORED,
     val joystickOpacity: Float = JOYSTICK_OPACITY_UNSET,
-    val showRuntimeToggle: Boolean = true,
+    val showRuntimeToggle: Boolean = false,
     val movementZoneSplit: Float = 0.5f,
     val buttonLookThroughEnabled: Boolean = true,
     val buttonLookThroughDragThreshold: Int = DEFAULT_BUTTON_DRAG_THRESHOLD,
@@ -245,7 +245,7 @@ data class ShooterModeConfig(
                     } else {
                         JOYSTICK_OPACITY_UNSET
                     },
-                    showRuntimeToggle = obj.optBoolean(KEY_SHOW_RUNTIME_TOGGLE, true),
+                    showRuntimeToggle = obj.optBoolean(KEY_SHOW_RUNTIME_TOGGLE, false),
                     movementZoneSplit = clampFloat(
                         obj.optDouble(KEY_MOVEMENT_ZONE_SPLIT, 0.5).toFloat(),
                         0.10f,

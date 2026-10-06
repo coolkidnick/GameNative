@@ -130,6 +130,10 @@ object PrefManager {
         dataStore.data.first()[key] ?: defaultValue
     }
 
+    private fun <T> getPrefOrNull(key: Preferences.Key<T>): T? = runBlocking {
+        dataStore.data.first()[key]
+    }
+
     @Suppress("SameParameterValue")
     private fun <T> setPref(key: Preferences.Key<T>, value: T) {
         scope.launch {
@@ -894,15 +898,12 @@ object PrefManager {
     private val LIBRARY_SORT_LEGACY = intPreferencesKey("library_sort")
     var librarySortOption: app.gamenative.ui.enums.SortOption
         get() {
-            // Try string key first, fall back to legacy ordinal for migration
-            val keyValue = getPref(LIBRARY_SORT_KEY, "")
-            return if (keyValue.isNotEmpty()) {
-                app.gamenative.ui.enums.SortOption.fromKey(keyValue)
-            } else {
-                val ordinal = getPref(LIBRARY_SORT_LEGACY, app.gamenative.ui.enums.SortOption.INSTALLED_FIRST.ordinal)
-                @Suppress("DEPRECATION")
-                app.gamenative.ui.enums.SortOption.fromOrdinal(ordinal)
-            }
+            // A saved choice (current key or legacy ordinal) wins. Otherwise open on
+            // installed games ordered by last played.
+            return app.gamenative.ui.model.LibrarySortUtils.resolveLibrarySortOption(
+                getPref(LIBRARY_SORT_KEY, ""),
+                getPrefOrNull(LIBRARY_SORT_LEGACY),
+            )
         }
         set(value) {
             setPref(LIBRARY_SORT_KEY, value.key)

@@ -95,6 +95,7 @@ import app.gamenative.ui.enums.LibraryTab
 import app.gamenative.ui.enums.PaneType
 import app.gamenative.ui.enums.SortOption
 import app.gamenative.ui.internal.fakeAppInfo
+import app.gamenative.ui.model.LibrarySortUtils
 import app.gamenative.ui.model.LibraryViewModel
 import app.gamenative.service.SteamService
 import app.gamenative.ui.screen.library.components.LibraryCarouselPane
@@ -361,6 +362,7 @@ private fun LibraryScreenContent(
     val carouselFocusRequester = remember { FocusRequester() }
     var gridFocusTargetListIndex by remember { mutableIntStateOf(0) }
     var carouselFocusTargetListIndex by remember { mutableIntStateOf(0) }
+    var centeredOpeningGame by rememberSaveable { mutableStateOf(false) }
     var pendingGridFocusRequest by remember { mutableStateOf(false) }
     var pendingCarouselFocusRequest by remember { mutableStateOf(false) }
 
@@ -603,6 +605,23 @@ private fun LibraryScreenContent(
         )
     } else {
         Modifier
+    }
+
+    // First time the All tab has games, centre the top real game (most recently
+    // played when that is the sort) instead of a featured or suggested card.
+    LaunchedEffect(state.appInfoList, currentPaneType, state.currentTab) {
+        if (centeredOpeningGame || state.currentTab != LibraryTab.ALL || state.appInfoList.isEmpty()) {
+            return@LaunchedEffect
+        }
+        val index = LibrarySortUtils.openingLibraryIndex(state.appInfoList.size) { itemIndex ->
+            val item = state.appInfoList[itemIndex]
+            item.isFeatured || item.isRecommended
+        }
+        carouselFocusTargetListIndex = index
+        if (currentPaneType == PaneType.CAROUSEL && carouselListState.firstVisibleItemIndex != index) {
+            carouselListState.scrollToItem(index)
+        }
+        centeredOpeningGame = true
     }
 
     // Restore focus after tab change - handles both empty and populated tabs

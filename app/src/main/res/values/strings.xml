@@ -549,8 +549,8 @@
     <string name="joystick_size_subtitle">Dynamic joystick size multiplier</string>
     <string name="joystick_opacity">Joystick Opacity</string>
     <string name="joystick_opacity_subtitle">Opacity for dynamic joystick rings and thumbs</string>
-    <string name="show_shooter_runtime_toggle">Show In-Game Toggle</string>
-    <string name="show_shooter_runtime_toggle_subtitle">Show the Enable Mouse / Enable Sticks button while shooter mode is active</string>
+    <string name="show_shooter_runtime_toggle">Show mouse mode banner</string>
+    <string name="show_shooter_runtime_toggle_subtitle">Show the Enable Mouse button at the top of the screen while shooter mode is on. The side menu control stays available.</string>
     <string name="movement_joystick_size">Movement Joystick Size</string>
     <string name="movement_joystick_size_subtitle">Size multiplier for the left-side dynamic joystick</string>
     <string name="movement_joystick_deadzone">Movement Dead Zone</string>
@@ -812,6 +812,13 @@
     <!--Game Feedback Dialog -->
     <string name="game_feedback_game_run">How did the game run?</string>
     <string name="game_feedback_issues_question">Select any issues you encountered:</string>
+    <string name="game_feedback_submitting">Submitting report…</string>
+    <string name="game_feedback_report_submitted">Report submitted</string>
+    <string name="game_feedback_report_failed">Report could not be submitted</string>
+    <string name="game_feedback_discard_title">Close without sending?</string>
+    <string name="game_feedback_discard_message">Your report will not be sent.</string>
+    <string name="game_feedback_keep_editing">Keep editing</string>
+    <string name="report_how_it_ran">Report how it ran</string>
 
 
     <!-- Profile & Menu -->
